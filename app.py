@@ -34,26 +34,23 @@ def get_model():
         try:
             model = load_model(MODEL_PATH)
 
-            # 🔥 Check if model is fitted
+            # Check if model is fitted
             model.predict(["test"])
-
             return model
 
         except Exception:
-            st.warning("⚠️ Model not fitted or corrupted. Retraining...")
+            st.warning("⚠️ Model corrupted. Retraining...")
 
-    # Train model if not found or broken
     if not DATA_PATH.exists():
         st.error("Dataset not found. Please add data/sample_news.csv")
         st.stop()
 
-    st.info("Training model... ⏳ Please wait")
+    st.info("Training model... ⏳")
 
     data = load_dataset(DATA_PATH)
     model, _ = train_model(data)
 
     save_model(model, MODEL_PATH)
-
     return model
 
 
@@ -76,17 +73,13 @@ if st.button("Analyze", type="primary"):
             label = result["label"]
             confidence = result["confidence"]
 
-            # 🔥 SMART OUTPUT LOGIC
-            if confidence < 0.6:
-                st.warning("🤔 Uncertain prediction — model is not confident")
-
-            elif label == "FAKE":
+            # 🔥 FINAL OUTPUT (ALWAYS REAL OR FAKE)
+            if label == "FAKE":
                 st.error("🚨 Fake News Detected")
-
             else:
                 st.success("✅ Real News")
 
-            st.metric("Confidence", f"{confidence:.1%}")
+            st.write(f"Confidence: {confidence:.1%}")
 
         except Exception as e:
             st.error("Error during prediction")
