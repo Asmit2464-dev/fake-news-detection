@@ -76,16 +76,17 @@ if st.button("Analyze", type="primary"):
             label = result["label"]
             confidence = result["confidence"]
 
-            if label == "FAKE":
+            # 🔥 SMART OUTPUT LOGIC
+            if confidence < 0.6:
+                st.warning("🤔 Uncertain prediction — model is not confident")
+
+            elif label == "FAKE":
                 st.error("🚨 Fake News Detected")
+
             else:
                 st.success("✅ Real News")
 
             st.metric("Confidence", f"{confidence:.1%}")
-
-            # ⚠️ Low confidence warning
-            if confidence < 0.6:
-                st.warning("⚠️ Low confidence prediction — result may not be accurate")
 
         except Exception as e:
             st.error("Error during prediction")
