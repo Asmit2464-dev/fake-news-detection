@@ -12,18 +12,23 @@ from src.model import (
 MODEL_PATH = Path("models/fake_news_model.joblib")
 DATA_PATH = Path("data/sample_news.csv")
 
-# Page config
+# ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="Fake News Detector",
     page_icon="📰",
     layout="centered"
 )
 
-# UI
-st.title("📰 Fake News Detector")
-st.write("Paste a news headline or article excerpt to estimate whether it looks real or fake.")
+# ---------------- UI HEADER ----------------
+st.markdown(
+    "<h1 style='text-align: center; color: #2E86C1;'>📰 Fake News Detection System</h1>",
+    unsafe_allow_html=True
+)
 
-# -------- LOAD OR TRAIN MODEL --------
+st.markdown("---")
+st.subheader("📌 Enter News Content")
+
+# ---------------- LOAD OR TRAIN MODEL ----------------
 def get_model():
     if MODEL_PATH.exists():
         try:
@@ -42,7 +47,7 @@ def get_model():
         st.error("Dataset not found. Please add data/sample_news.csv")
         st.stop()
 
-    st.info("Training model... ⏳")
+    st.info("Training model... ⏳ Please wait")
 
     data = load_dataset(DATA_PATH)
     model, _ = train_model(data)
@@ -54,14 +59,14 @@ def get_model():
 
 model = get_model()
 
-# -------- INPUT --------
+# ---------------- INPUT ----------------
 news_text = st.text_area(
-    "News text",
-    height=220,
-    placeholder="Paste a news headline or article body here..."
+    "",
+    height=200,
+    placeholder="Paste news headline or full article..."
 )
 
-# -------- PREDICTION --------
+# ---------------- PREDICTION ----------------
 if st.button("Analyze", type="primary"):
     if not news_text.strip():
         st.error("Please enter some news text.")
@@ -72,17 +77,20 @@ if st.button("Analyze", type="primary"):
             confidence = result["confidence"]
 
             if label == "FAKE":
-                st.error(f"🚨 Prediction: {label}")
+                st.error("🚨 Fake News Detected")
             else:
-                st.success(f"✅ Prediction: {label}")
+                st.success("✅ Real News")
 
             st.metric("Confidence", f"{confidence:.1%}")
+
+            # ⚠️ Low confidence warning
+            if confidence < 0.6:
+                st.warning("⚠️ Low confidence prediction — result may not be accurate")
 
         except Exception as e:
             st.error("Error during prediction")
             st.exception(e)
 
-# Footer
-st.caption(
-    "⚠️ This is a machine learning estimate. Always verify important claims with trusted sources."
-)
+# ---------------- FOOTER ----------------
+st.markdown("---")
+st.caption("Developed using Machine Learning (TF-IDF + Logistic Regression)")
